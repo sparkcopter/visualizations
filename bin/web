@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Compile assets
+gulp &
+
+# Start the webserver
+coffee index.coffee
