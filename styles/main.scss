@@ -1,16 +1,50 @@
+body {
+  padding: 10px;
+}
+
+.orientation {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 300px;
+
+  &__axis {
+    background-color: #fafafa;
+    flex: 1;
+    margin: 0 5px;
+    border: 1px solid #eee;
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
 svg {
   font: 10px sans-serif;
-}
 
-.line {
-  fill: none;
-  stroke: #000;
-  stroke-width: 1.5px;
-}
+  .axis {
+    .tick {
+      fill: #ddd;
+    }
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+    .domain {
+      stroke: #ddd;
+    }
+  }
+
+  .line {
+    stroke: #00a3d5;
+    fill: none;
+    stroke-width: 1.5px;
+  }
+
+  .title {
+    fill: #aaa;
+    font-size: 1.5em;
+  }
 }

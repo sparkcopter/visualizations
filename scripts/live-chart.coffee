@@ -1,111 +1,102 @@
 class LiveChart
   constructor: (@element, options={})->
-    n = 100
-    duration = 100
-    now = new Date(Date.now() - duration)
-    count = 0
-    data = d3.range(n).map(-> 0)
+    @$element = $(@element)
+    @event = @$element.data("chart")
+    @times = []
+    @data = []
 
-    margin = {top: 6, right: 0, bottom: 20, left: 40}
-    width = 960 - margin.right
-    height = 120 - margin.top - margin.bottom
+    # TODO: Make these configurable
+    @showSeconds = 10
+    @tickFrequency = 1
+    yDomain = @$element.data("ydomain")
 
-    x = d3.time.scale()
-        # .domain([now - (n - 2) * duration, now - duration])
-        .range([0, width]);
+    # TODO: Update these with browser resize
+    width = @$element.width()
+    height = @$element.height()
 
-    y = d3.scale.linear()
-        .domain([-90, 90])
-        .range([height, 0]);
+    margin =
+      top: 0
+      right: 0
+      bottom: 0
+      left: 0
 
-    line = d3.svg.line()
-        .interpolate("basis")
-        .x((d, i) -> x(now - (n - 1 - i) * duration))
-        .y((d, i) -> y(d));
-
-    svg = d3.select(@element).append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .style("margin-left", -margin.left + "px")
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    svg.append("defs").append("clipPath")
-        .attr("id", "clip")
-      .append("rect")
+    # Create the chart canvas
+    @chart = d3.select(@element)
+      .append("svg")
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height)
+      .append("g")
+        .attr("transform", "translate(#{margin.left}, #{margin.top})")
 
-    axis = svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(x.axis = d3.svg.axis().scale(x).orient("bottom"));
+    # Create the x scale, axis and elemtn
+    now = new Date()
+    @x = d3.time.scale()
+      .domain([d3.time.second.offset(now, -@showSeconds), now])
+      .rangeRound([0, width - margin.left - margin.right]);
 
-    path = svg.append("g")
-        .attr("clip-path", "url(#clip)")
+    @x.axis = d3.svg.axis()
+      .scale(@x)
+      .orient('bottom')
+      .ticks(d3.time.seconds, @tickFrequency)
+      .tickSize(0)
+
+    @x.element = @chart.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0, #{(height - margin.top - margin.bottom)/2})")
+      .call(@x.axis)
+
+    # Create the y scale, axis and element
+    @y = d3.scale.linear()
+      .domain(yDomain)
+      .rangeRound([0, height - margin.top - margin.bottom])
+
+    # Create the data line and element
+    @line = d3.svg.line()
+      .x((d, i) => @x(d.time))
+      .y((d, i) => @y(d.value))
+
+    @line.element = @chart.append("g")
       .append("path")
-        .datum(data)
-        .attr("class", "line");
+        .datum(@data)
+        .attr("class", "line")
 
-    transition = d3.select({}).transition()
-        .duration(duration)
-        .ease("linear");
+    @chart.append("text")
+      .attr("x", "0.5em")
+      .attr("y", "0.25em")
+      .attr("dy", "1em")
+      .attr("class", "title")
+      .text(@$element.data("title"))
 
-    d3.select(window)
-        .on("scroll", -> ++count );
-
-    # tick = ->
-    #   transition = transition.each(->
-    #
-    #     # update the domains
-    #     now = new Date();
-    #     x.domain([now - (n - 2) * duration, now - duration]);
-    #     # y.domain([0, d3.max(data)]);
-    #
-    #     # push the accumulated count onto the back, and reset the count
-    #     data.push(Math.min(30, count) * 10);
-    #     count = 0;
-    #
-    #     # redraw the line
-    #     svg.select(".line")
-    #         .attr("d", line)
-    #         .attr("transform", null);
-    #
-    #     # slide the x-axis left
-    #     axis.call(x.axis);
-    #
-    #     # slide the line left
-    #     path.transition()
-    #         .attr("transform", "translate(" + x(now - (n - 1) * duration) + ")");
-    #
-    #     # pop the old data point off the front
-    #     data.shift();
-    #
-    #   ).transition().each("start", tick);
-    #
-    # tick()
+  connect: (socket) ->
+    socket.on @event, (dataPoint) => @push(dataPoint)
 
   push: (dataPoint) ->
-    # update the domains
-    now = new Date();
-    x.domain([now - (n - 2) * duration, now - duration]);
-    # y.domain([0, d3.max(data)]);
+    now = new Date()
 
-    # push the accumulated count onto the back, and reset the count
-    data.push(dataPoint)
-    count = 0;
+    # Add new datapoint to array
+    @data.push
+      time: now
+      value: dataPoint
 
-    # redraw the line
-    svg.select(".line")
-        .attr("d", line)
-        .attr("transform", null);
+    # Update x-axis domain
+    @x.domain([d3.time.second.offset(now, -@showSeconds), now]);
 
-    # slide the x-axis left
-    axis.call(x.axis);
+    # Slide the x-axis left
+    @x.element.call(@x.axis)
 
-    # slide the line left
-    path.transition()
-        .attr("transform", "translate(" + x(now - (n - 1) * duration) + ")");
+    # Redraw line
+    @line.element
+      .attr("d", @line)
+      .attr("transform", null)
 
-    # pop the old data point off the front
-    data.shift();
+    # Remove old datapoints
+    # TODO: Find the correct way to remove "off-screen" datapoints
+    if @data.length > 300
+      @data.splice(0, @data.length - 300)
+
+  updateEventRate: ->
+    @times.shift() if @times.length > 100
+
+    now = new Date().getTime()
+    @rate = @times.length * 1000 / (now - @times[0]) if @times.length > 0
+    @times.push(now)

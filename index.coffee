@@ -22,25 +22,20 @@ app.use express.static(process.cwd() + "/public")
 
 # Set up HTTP actions
 app.get "/", (req, res) ->
-  res.render "index", { title: 'Hey', message: 'Hello there!'}
+  res.render "index", {}
 
 # Set up Socket.io actions
 io.on "connection", (socket) ->
-  console.log('a user connected')
+  console.log "client connected"
 
   socket.on "disconnect", ->
-    console.log('user disconnected')
+    console.log "client disconnected"
 
   # Send navdata to connected clients
   client.on "navdata", (navdata) ->
-    socket.emit "rotation",
-      x: navdata.demo.rotation.x
-      y: navdata.demo.rotation.y
-      z: navdata.demo.rotation.z
-
-# # Output navdata
-# client.on "navdata", (navdata) ->
-#   console.log "roll/pitch/yaw: #{navdata.demo.rotation.roll}/#{navdata.demo.rotation.pitch}/#{navdata.demo.rotation.yaw}"
+    socket.emit "roll", navdata.demo.rotation.roll
+    socket.emit "pitch", navdata.demo.rotation.pitch
+    socket.emit "yaw", navdata.demo.rotation.yaw
 
 # Start the server
 server.listen 3000, ->

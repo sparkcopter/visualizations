@@ -5,22 +5,27 @@ bowerFiles = require "main-bower-files"
 rimraf = require "rimraf"
 
 # Gulp plugins
-coffee = require "gulp-coffee"
-concat = require "gulp-concat"
-filter = require "gulp-filter"
-sass   = require "gulp-sass"
+autoprefixer = require "gulp-autoprefixer"
+coffee       = require "gulp-coffee"
+concat       = require "gulp-concat"
+filter       = require "gulp-filter"
+plumber      = require "gulp-plumber"
+sass         = require "gulp-sass"
+util         = require "gulp-util"
 
 # Compile sass files to css
 gulp.task "sass", ->
     gulp.src "styles/*.scss"
       .pipe sass()
+      .pipe autoprefixer()
       .pipe gulp.dest('public/css')
 
 # Compile coffeescript files to javascript
 gulp.task "coffee", ->
     gulp.src "scripts/*.coffee"
-      .pipe coffee({bare: true})
-      .pipe gulp.dest("public/javascript")
+      .pipe(plumber()) # Prevent pipe breaking caused by errors from gulp plugins
+      .pipe(coffee({bare: true}))
+      .pipe(gulp.dest("public/javascript"))
 
 # Install bower dependencies
 gulp.task "bower-install", ->
@@ -41,8 +46,8 @@ gulp.task "vendor-css", ["bower-install"], ->
 
 # Watch files For changes
 gulp.task "watch", ->
-    gulp.watch "src/scripts/*.coffee", ["coffee"]
-    gulp.watch "src/styles/*.scss", ["sass"]
+    gulp.watch "scripts/*.coffee", ["coffee"]
+    gulp.watch "styles/*.scss", ["sass"]
     gulp.watch "bower.json", ["bower-install"]
     gulp.watch "bower_components/**", ["vendor-js", "vendor-css"]
 

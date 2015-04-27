@@ -6,7 +6,12 @@ html
   body
     h1 Sparkcopter Visualizations
     
-    #rotation-x(style="width: 100%; height: 400px")
+    h2 Orientation
+    
+    .orientation
+      #roll.orientation__axis(data-chart="roll" data-ydomain="[-90,90]" data-title="roll")
+      #pitch.orientation__axis(data-chart="pitch" data-ydomain="[-90,90]" data-title="pitch")
+      #yaw.orientation__axis(data-chart="yaw" data-ydomain="[-180,180]" data-title="yaw")
     
     script(src="/socket.io/socket.io.js")
     script(src="/javascript/vendor.js")
