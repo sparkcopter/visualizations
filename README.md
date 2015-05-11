@@ -3,6 +3,13 @@ Sparkcopter Visualizations
 
 Real-time sensor visualization app for Sparkcopter, a Spark Core based quadcopter.
 
+While developing the firmware for the Sparkcopter, I found myself wanting to understand the ouputs of my sensors and calculations in a visual way, rather than looking through log output, so I built real-time roll/pitch/yaw charts and an aircraft-style attitude guage.
+
+Screenshot
+----------
+
+![Screenshot](http://i.imgur.com/8iIMwbm.png)
+
 
 Installation
 ------------
