@@ -1,26 +1,29 @@
 body {
-  padding: 10px;
+  padding: 20px;
 }
 
-.orientation {
+.wrapper {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 300px;
+}
+
+.orientation {
+  flex: 2;
 
   &__axis {
     background-color: #fafafa;
-    flex: 1;
-    margin: 0 5px;
+    margin: 0 5px 30px;
     border: 1px solid #eee;
+    height: 180px;
+  }
+}
 
-    &:first-child {
-      margin-left: 0;
-    }
-
-    &:last-child {
-      margin-right: 0;
-    }
+.guages {
+  flex: 1;
+  text-align: center;
+  &__guage {
+    margin: 0 auto;
   }
 }
 
