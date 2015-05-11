@@ -44,3 +44,5 @@ Running
     ```
     DRONE_IP=192.168.1.1 npm start
     ```
+
+-   Open in your browser (<http://localhost:3000>)
