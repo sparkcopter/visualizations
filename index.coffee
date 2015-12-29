@@ -24,6 +24,10 @@ app.use express.static(process.cwd() + "/public")
 app.get "/", (req, res) ->
   res.render "index", {}
 
+app.post "/trim", (req, res) ->
+  client.ftrim()
+  res.send "ok"
+
 # Set up Socket.io actions
 io.on "connection", (socket) ->
   console.log "client connected"
@@ -33,6 +37,7 @@ io.on "connection", (socket) ->
 
   # Send navdata to connected clients
   client.on "navdata", (navdata) ->
+    console.log navdata
     socket.emit "roll", navdata.demo.rotation.roll
     socket.emit "pitch", navdata.demo.rotation.pitch
     socket.emit "yaw", navdata.demo.rotation.yaw

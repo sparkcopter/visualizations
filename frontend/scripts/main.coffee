@@ -21,3 +21,9 @@ $("[data-attitude]").each ->
   socket.on "roll", (degrees) ->
     orientation.roll = degrees
     attitude.draw(orientation.yaw, orientation.pitch, orientation.roll)
+
+# Attach buttons
+$("[data-trim]").click ->
+  $.ajax
+    url: "/trim"
+    method: "POST"
